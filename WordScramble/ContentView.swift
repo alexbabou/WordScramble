@@ -16,6 +16,7 @@ struct ContentView: View {
     @State private var errorMessage = ""
     @State private var showingError = false
     
+    @State private var score = 0
     var body: some View {
         NavigationView {
             VStack {
@@ -30,6 +31,7 @@ struct ContentView: View {
                 }.listStyle(GroupedListStyle())
             }
             .navigationBarTitle(rootWord)
+            .navigationBarItems(leading: Text("Score: \(score)"), trailing: Button("Next Word", action: startGame))
             .onAppear(perform: startGame)
             .alert(isPresented: $showingError, content: {
                 Alert(title: Text(errorTitle), message: Text(errorMessage), dismissButton: .default(Text("Ok")))
@@ -63,6 +65,7 @@ struct ContentView: View {
         
         usedWords.insert(answer, at: 0)
         newWord = ""
+        score += answer.count
     }
     
     func startGame() {
@@ -81,11 +84,17 @@ struct ContentView: View {
     }
     
     func isPossible(word: String) -> Bool {
+        var tempWord = rootWord
         for letter in word {
-            if !rootWord.contains(letter) { return false }
+            if let charIndex = tempWord.firstIndex(of: letter) {
+                tempWord.remove(at: charIndex)
+            } else {
+                return false
+            }
         }
         return true
     }
+
     
     func isRealWord(word: String) -> Bool {
         let checker = UITextChecker()
